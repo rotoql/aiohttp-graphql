@@ -156,11 +156,20 @@ class GraphQLView: # pylint: disable = too-many-instance-attributes
                     params=all_params[0],
                     result=result,
                 )
-
+            headers = request.headers
+            origin = headers.get('Origin', '') 
+            method = headers.get('Access-Control-Request-Method', '').upper()
+            accepted_methods = ['GET', 'POST', 'PUT', 'DELETE']
             return web.Response(
                 text=result,
                 status=status_code,
                 content_type='application/json',
+                headers={
+                    'Access-Control-Allow-Origin': origin,
+                    'Access-Control-Allow-Methods': ', '.join(accepted_methods),
+                    'Access-Control-Max-Age': str(self.max_age),
+                    'Access-Control-Allow-Headers': 'content-type'
+                }
             )
 
         except HttpQueryError as err:
@@ -194,6 +203,7 @@ class GraphQLView: # pylint: disable = too-many-instance-attributes
                     'Access-Control-Allow-Origin': origin,
                     'Access-Control-Allow-Methods': ', '.join(accepted_methods),
                     'Access-Control-Max-Age': str(self.max_age),
+                    'Access-Control-Allow-Headers': 'content-type'
                 }
             )
         return web.Response(status=400)
